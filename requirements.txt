@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+python-multipart
+pydantic>=2
+openai>=1.40
+Pillow
