@@ -1,0 +1,54 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+.venv
+*.egg-info/
+dist/
+build/
+
+# Environment
+.env
+.env.local
+*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# iOS / Xcode
+ios/Heal.xcodeproj/project.xcworkspace/
+ios/Heal.xcodeproj/xcuserdata/
+ios/**/xcuserdata/
+ios/build/
+ios/DerivedData/
+*.xcuserstate
+*.moved-aside
+*.xccheckout
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcworkspace/xcuserdata/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Test images (keep placeholders)
+a_whole_pig.png
+Binghongcha.png
+food.jpg
+
+# Temporary files
+create_views.txt
+*.backup.*
