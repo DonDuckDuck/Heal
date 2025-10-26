@@ -6,6 +6,12 @@ the CGMacros dataset, records 10 days of meals and continuous glucose readings f
 
 
 To address this, we developed Heal, an AI-powered nutrition assistant for diabetes management. Users can simply take a photo of their meal to get instant estimates of calories, carbs, protein, and fat, along with real-time feedback and personalized suggestions. Heal helps people with diabetes understand how their daily food choices affect blood sugar and make healthier eating decisions with ease.
+<img width="603" height="1311" alt="Dayly Macro" src="https://github.com/user-attachments/assets/f9e4242b-59ca-4487-8526-ac21b0ffd016" />
+<img width="603" height="1311" alt="Meal Analysis" src="https://github.com/user-attachments/assets/f9bd9c8c-0016-486c-ac7f-55bab1aa174e" />
+<img width="603" height="1311" alt="Meal Analysis2" src="https://github.com/user-attachments/assets/6babbff8-636e-49a0-9e0a-5df938918c1e" />
+<img width="603" height="1311" alt="Meal Photo" src="https://github.com/user-attachments/assets/5f16249d-fd2e-4a6a-bd13-ccfe258a2aeb" />
+<img width="603" height="1311" alt="Profile" src="https://github.com/user-attachments/assets/ef06317a-0421-4703-add5-6c85ed1ba99d" />
+
 
 ## Features
 
