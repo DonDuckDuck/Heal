@@ -229,6 +229,133 @@ def calc_budget(req: BudgetRequest):
 # LLM functions (OpenAI only)
 # =============================
 
+def profile_schema() -> Dict[str, Any]:
+    return {
+        "type": "json_schema",
+        "json_schema": {
+            "name": "registration_profile",
+            "strict": True,
+            "schema": {
+                "type": "object",
+                "additionalProperties": False,
+                "properties": {
+                    "final_targets": {
+                        "type": "object",
+                        "required": ["kcal", "protein_g", "fat_g", "carb_g"],
+                        "additionalProperties": False,
+                        "properties": {
+                            "kcal": {"type": "number"},
+                            "protein_g": {"type": "number"},
+                            "fat_g": {"type": "number"},
+                            "carb_g": {"type": "number"}
+                        }
+                    },
+                    "per_meal_targets": {
+                        "type": "array",
+                        "maxItems": 8,
+                        "items": {
+                            "type": "object",
+                            "required": ["name", "time", "kcal", "protein_g", "fat_g", "carb_g"],
+                            "additionalProperties": False,
+                            "properties": {
+                                "name": {"type": "string"},
+                                "time": {"type": "string"},
+                                "kcal": {"type": "number"},
+                                "protein_g": {"type": "number"},
+                                "fat_g": {"type": "number"},
+                                "carb_g": {"type": "number"}
+                            }
+                        }
+                    },
+                    "adjustments": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                    },
+                    "coaching_points": {
+                        "type": "array", "minItems": 3, "maxItems": 6, "items": {"type": "string"}
+                    },
+                    "reminder_windows": {
+                        "type": "array", "items": {"type": "string"}
+                    },
+                    "model_info": {"type": "string"}
+                },
+                "required": ["final_targets", "per_meal_targets", "adjustments", "coaching_points", "reminder_windows", "model_info"]
+            }
+        }
+    }
+
+PROFILE_SYSTEM_PROMPT = (
+    "You are creating a diabetes-friendly nutrition profile for a new user."
+    " Start from 'proposed_targets' and 'proposed_per_meal' and only adjust within ±10% based on diabetes type, schedule, and exercise."
+    " If you adjust, explain briefly in 'adjustments'."
+    " List 3–6 coaching points (hydration, fiber, carb distribution, protein at breakfast, plate method)."
+    " Provide reminder windows as human-friendly strings like '10 minutes before breakfast'."
+    " Return ONLY JSON."
+)
+
+
+class RegistrationProfileRequest(BaseModel):
+    height_cm: float
+    weight_kg: float
+    age: int
+    sex: Literal["male", "female"]
+    exercise_level: Literal["sedentary", "light", "moderate", "active", "very_active"]
+    diabetes_type: Literal["T1D", "T2D", "unknown"] = "unknown"
+    meals_per_day: int = Field(3, ge=1, le=8)
+    meal_names: Optional[List[str]] = None
+    meal_times: Optional[List[str]] = None  # e.g., ["07:30", "12:30", "19:00"]
+    timezone: Optional[str] = None
+
+
+@app.post("/llm/profile")
+def llm_profile(req: RegistrationProfileRequest):
+    try:
+        # Deterministic base targets
+        bmr = 10 * req.weight_kg + 6.25 * req.height_cm - 5 * req.age + (5 if req.sex == "male" else -161)
+        tdee = bmr * _activity_factor(req.exercise_level)
+        splits = _macro_split(req.diabetes_type)
+        protein_kcal = tdee * splits["protein"]
+        carb_kcal = tdee * splits["carb"]
+        fat_kcal = tdee * splits["fat"]
+        base_daily = {
+            "kcal": round(tdee, 1),
+            "protein_g": round(protein_kcal / 4, 1),
+            "carb_g": round(carb_kcal / 4, 1),
+            "fat_g": round(fat_kcal / 9, 1),
+        }
+        # Default meal names and times
+        meal_names = req.meal_names or [f"Meal {i+1}" for i in range(req.meals_per_day)]
+        times = req.meal_times or []
+        per_meal = []
+        for i in range(req.meals_per_day):
+            per_meal.append({
+                "name": meal_names[i] if i < len(meal_names) else f"Meal {i+1}",
+                "time": times[i] if i < len(times) else "",
+                "kcal": round(base_daily["kcal"] / req.meals_per_day, 1),
+                "protein_g": round(base_daily["protein_g"] / req.meals_per_day, 1),
+                "carb_g": round(base_daily["carb_g"] / req.meals_per_day, 1),
+                "fat_g": round(base_daily["fat_g"] / req.meals_per_day, 1),
+            })
+
+        payload = {
+            "user": req.model_dump(),
+            "proposed_targets": base_daily,
+            "proposed_per_meal": per_meal,
+            "macro_split": splits,
+        }
+        resp = client.chat.completions.create(
+            model="gpt-4o-mini",
+            temperature=0.2,
+            response_format=profile_schema(),
+            messages=[
+                {"role": "system", "content": PROFILE_SYSTEM_PROMPT},
+                {"role": "user", "content": json.dumps(payload, ensure_ascii=False)},
+            ],
+            timeout=60_000,
+        )
+        return JSONResponse(json.loads(resp.choices[0].message.content))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 def compare_schema() -> Dict[str, Any]:
     return {
         "type": "json_schema",
