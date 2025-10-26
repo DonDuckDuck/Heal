@@ -1,6 +1,11 @@
 # Heal - Diabetes Nutrition Assistant
 
-An AI-powered diet management app for people with diabetes. Automatically tracks nutrition through food photos, provides real-time feedback, and delivers daily insights.
+Unhealthy eating habits are a major cause of type 2 diabetes and related diseases. Using data from the CGMacros dataset from 45 participants，— we explored how food composition affects blood glucose levels.
+the CGMacros dataset, records 10 days of meals and continuous glucose readings from healthy, prediabetic, and diabetic participants, we found clear differences in eating patterns. Diabetic individuals tend to consume more carbohydrates and protein per meal, and their blood glucose remains higher across all carb intake levels. These results show that meal composition—not just calories—has a strong impact on glucose control.
+<img width="1309" height="768" alt="图片_2025-10-26_115553_090" src="https://github.com/user-attachments/assets/bdd7f378-f107-4255-9997-69e88e2985c0" /><img width="1309" height="768" alt="图片_2025-10-26_115553_090" src="https://github.com/user-attachments/assets/a69bd0df-ca66-4255-8443-bffa88e23e7b" />
+
+
+To address this, we developed Heal, an AI-powered nutrition assistant for diabetes management. Users can simply take a photo of their meal to get instant estimates of calories, carbs, protein, and fat, along with real-time feedback and personalized suggestions. Heal helps people with diabetes understand how their daily food choices affect blood sugar and make healthier eating decisions with ease.
 
 ## Features
 
@@ -182,7 +187,7 @@ uvicorn backend.main:app --reload
 
 ## License
 
-MIT
+LGPL
 
 ## Support
 
